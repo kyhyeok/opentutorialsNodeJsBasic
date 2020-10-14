@@ -1,14 +1,17 @@
 const http = require("http");
 const fs = require("fs");
+const url = require("url");
 const app = http.createServer(function (request, response) {
-  const url = request.url;
-  if (request.url == "/") {
-    url = "/index.html";
+  const requestUrl = request.url;
+  const queryData = url.parse(requestUrl, true).query;
+  console.log(queryData.id);
+  if (requestUrl == "/") {
+    requestUrl = "/index.html";
   }
-  if (request.url == "/favicon.ico") {
+  if (requestUrl == "/favicon.ico") {
     return response.writeHead(404);
   }
   response.writeHead(200);
-  response.end(fs.readFileSync(__dirname + url));
+  response.end(queryData.id);
 });
 app.listen(3000);
