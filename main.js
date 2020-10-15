@@ -118,6 +118,23 @@ const app = http.createServer((request, response) => {
         response.end(template);
       });
     });
+  } else if (pathname === "/update_process") {
+    let body = "";
+    request.on("data", (data) => {
+      body = body + data;
+    });
+    request.on("end", () => {
+      const post = querystring.parse(body);
+      const id = post.id;
+      const title = post.title;
+      const description = post.description;
+      fs.rename(`data/${id}`, `data/${title}`, (err) => {
+        fs.writeFile(`data/${title}`, description, "utf8", (err) => {
+          response.writeHead(302, { Location: `/?id=${title}` });
+          response.end();
+        });
+      });
+    });
   } else {
     response.writeHead(404);
     response.end("Not found");
