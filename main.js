@@ -86,9 +86,15 @@ const app = http.createServer((request, response) => {
     request.on("data", (data) => {
       body = body + data;
     });
-    request.on("end", () => {});
-    response.writeHead(200);
-    response.end("success");
+    request.on("end", () => {
+      const post = querystring.parse(body);
+      const title = post.title;
+      const description = post.description;
+      fs.writeFile(`data/${title}`, description, "utf8", (err) => {
+        response.writeHead(302, { Location: `/?id=${title}` });
+        response.end();
+      });
+    });
   } else {
     response.writeHead(404);
     response.end("Not found");
