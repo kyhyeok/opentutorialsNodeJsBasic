@@ -4,6 +4,7 @@ const url = require("url");
 const querystring = require("querystring");
 const template = require("./lib/template");
 const path = require("path");
+const sanitizeHtml = require("sanitize-html");
 
 const app = http.createServer((request, response) => {
   const requestUrl = request.url;
@@ -26,18 +27,20 @@ const app = http.createServer((request, response) => {
       });
     } else {
       const title = queryData.id;
+      const sanitizedTitle = sanitizeHtml(title);
       fs.readdir("./data", (err, fileList) => {
         const filteredId = path.parse(title).base;
         fs.readFile(`data/${filteredId}`, "utf-8", (err, description) => {
+          const sanitizedDescription = sanitizeHtml(description);
           const list = template.list(fileList);
           const html = template.html(
-            title,
+            sanitizedTitle,
             list,
-            `<h2>${title}</h2>${description}`,
+            `<h2>${sanitizedTitle}</h2>${sanitizedDescription}`,
             `<a href="/create">create</a>
-            <a href="/update?id=${title}">update</a>
+            <a href="/update?id=${sanitizedTitle}">update</a>
             <form action="delete_process" method="post">
-              <input type="hidden" name="id" value="${title}" />
+              <input type="hidden" name="id" value="${sanitizedTitle}" />
               <input type="submit" value="delete" />
             </form>
             `
@@ -83,20 +86,22 @@ const app = http.createServer((request, response) => {
     });
   } else if (pathname === "/update") {
     const title = queryData.id;
+    const sanitizedTitle = sanitizeHtml(title);
     fs.readdir("./data", (err, fileList) => {
       const filteredId = path.parse(title).base;
       fs.readFile(`data/${filteredId}`, "utf-8", (err, description) => {
+        const sanitizedDescription = sanitizeHtml(description);
         const list = template.list(fileList);
         const html = template.html(
-          title,
+          sanitizedTitle,
           list,
           `<form action="/update_process" method="post">
-            <input type="hidden" name="id" value="${title}"
-            <p><input type="text" name="title" placeholder="title" value=${title} /></p>
-            <p><textarea name="description" placeholder="description" >${description}</textarea></p>
+            <input type="hidden" name="id" value="${sanitizedTitle}"
+            <p><input type="text" name="sanitizedTitle" placeholder="sanitizedTitle" value=${sanitizedTitle} /></p>
+            <p><textarea name="description" placeholder="description" >${sanitizedDescription}</textarea></p>
             <p><input type="submit"></p>
           </form>`,
-          `<a href="/create">create</a> <a href="/update?id=${title}">update</a>`
+          `<a href="/create">create</a> <a href="/update?id=${sanitizedTitle}">update</a>`
         );
         response.writeHead(200);
         response.end(html);
