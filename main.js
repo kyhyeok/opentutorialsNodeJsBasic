@@ -1,8 +1,5 @@
 const http = require("http");
 const url = require("url");
-const querystring = require("querystring");
-const template = require("./lib/template");
-const db = require("./lib/db");
 const topic = require("./lib/topic");
 const author = require("./lib/author");
 
@@ -28,6 +25,8 @@ const app = http.createServer((request, response) => {
     topic.delete_process(request, response);
   } else if (pathname === "/author") {
     author.home(request, response);
+  } else if (pathname === "/author_create_process") {
+    author.create_process(request, response);
   } else {
     response.writeHead(404);
     response.end("Not found");
